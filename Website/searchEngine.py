@@ -11,12 +11,7 @@ search_engine = Blueprint('search', __name__)
 selected_hotel = ""
 display_results = False
 
-@search_engine.route("/search/<string:location>", methods=['GET', 'POST'])
-@login_required
-def search_from_home(location):
-    display_results = True
-    hotel_results = Hotel.query.filter(Hotel.address.like('%'+location+'%')).all()
-    return render_template('search.html', hotels = hotel_results, display_results = display_results)
+
 
 @search_engine.route("/search", methods=['GET', 'POST'])
 @login_required
@@ -35,6 +30,26 @@ def search():
             hotel_results = Hotel.query.filter(Hotel.hotel_chain_ID == target_hotel_ID , Hotel.address.like('%'+target_city+'%')).all()
         return render_template('search.html', hotels = hotel_results, display_results = display_results)
     return render_template('search.html')
+
+@search_engine.route("/search/<string:location>", methods=['GET', 'POST'])
+@login_required
+def search_from_home(location):
+    display_results = True
+    hotel_results = Hotel.query.filter(Hotel.address.like('%'+location+'%')).all()
+    if request.method == 'POST': #need to add more ways of searching (example: by location, city...)
+        display_results = True
+        target_hotel_ID = request.form.get('hotelChainName')
+        target_city = request.form.get('location')
+        if(len(target_hotel_ID)==0 and len(target_city)==0): #if no filters are given. Simply show all possible hotels. 
+            hotel_results = Hotel.query.all()
+        elif(len(target_city)==0 and len(target_hotel_ID)!=0 ): #search based hotel_ID
+            hotel_results = Hotel.query.filter_by(hotel_chain_ID = target_hotel_ID).all()#all hotels belonging to specific chain.
+        elif(len(target_city)!=0 and len(target_hotel_ID)==0 ): #search based on city
+            hotel_results = Hotel.query.filter(Hotel.address.like('%'+target_city+'%')).all()
+        elif(len(target_city)!=0 and len(target_hotel_ID)!=0 ): #search based on both (city and hotel_ID).
+            hotel_results = Hotel.query.filter(Hotel.hotel_chain_ID == target_hotel_ID , Hotel.address.like('%'+target_city+'%')).all()
+        return render_template('search.html', hotels = hotel_results, display_results = display_results)
+    return render_template('search.html', hotels = hotel_results, display_results = display_results)
 
 def user_is_employee() -> bool: #will check if the current user is found in the employee table by checking the PK id. 
     is_employee = Employee.query.filter_by(id= current_user.id).first()
