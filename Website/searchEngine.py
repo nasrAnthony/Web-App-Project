@@ -136,10 +136,10 @@ def populate_history():
 def see_bookings(room_id, hotel_id):
     if request.method == 'POST':
         #check if there exists history entites yet. 
-        is_there_history = History.query.all()
-        if not(is_there_history):
-            print("No history found, a new batch was pushed to the DB!")
-            populate_history()
+        #is_there_history = History.query.all()
+        #if not(is_there_history):
+        #    print("No history found, a new batch was pushed to the DB!")
+        #    populate_history()
         start_date = request.form.get('start_date') #booking start date. 
         end_date = request.form.get('end_date') #booking end date. 
         #print(start_date, end_date)

@@ -116,13 +116,26 @@ def validateEmployee(email, passwordv1, passwordv2, fullName, ID, address, role,
     else:
         return (True, None)
 
-
+def populate_history():
+    hotels = Hotel.query.all()
+    for hotel in hotels:
+        list_rentings = pickle.dumps([])
+        list_bookings = pickle.dumps([])
+        new_history = History(hotel_ID=str(hotel.hotel_ID), hotel_chain_ID=str(hotel.hotel_chain_ID), 
+                      list_rentings=list_rentings, list_bookings=list_bookings)
+        db.session.add(new_history)
+        db.session.commit()
+        
 @authenticator.route("/sign-up", methods=['GET', 'POST'])
 def sign_up():
     available_roles = ['Manager', 'Clerk', 'Assistant']
     hotel_chains = Hotel_Chain.query.all()
     if request.method == 'POST':
         #fetching user info. 
+        is_there_history = History.query.all()
+        if not(is_there_history):
+            print("No history found, a new batch was pushed to the DB!")
+            populate_history()
         email = request.form.get('email')
         passwordv1 = request.form.get('passwordTemp')
         passwordv2 = request.form.get('password')
