@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Rooms{% endblock %}
+{% block content %}
+<div style="padding-top: 10px;"></div>
+<h1>Rooms at the {{ hotel_id }}</h1>
+<div style="padding-top: 20px;"></div>
+{% if rooms %}
+    <div class="room-results">
+        {% for room in rooms %}
+        <div class="card">
+            <div class="card-body"> 
+              <h4 class="card-title">Room {{ room.room_number }}</h4>
+              <p class="card-text">View: {{ room.view }}</p>
+              <p class="card-text">Price: ${{ room.price }} CAD/night</p>
+              <a href="{{ url_for('search.see_bookings', room_id= room.room_ID, hotel_id= hotel_id) }}" class="btn btn-primary">Book</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p>No results found.</p>
+{% endif %}
+{% endblock %}

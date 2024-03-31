@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+<style>
+  .rating-number {
+    font-size: 0.9rem; /* Adjust size as needed */
+    margin-left: 0.3rem; /* Space from the stars */
+  } 
+  /* Previous styles */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  .hotel-results {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+  }
+  .card {
+    margin-top: 1rem;
+    width: 18rem;
+  }
+  /* Styles for the star rating */
+  .star-rating {
+    font-size: 1rem; /* Adjust size as needed */
+  }
+  .star-rating .full {
+    color: orange; /* Black color for filled stars */
+  }
+  .star-rating .empty {
+    color: #ddd; /* Light gray for empty stars */
+  }
+</style>
+<form method="POST" style="margin-bottom: 2rem;">
+    <h3 align="center">Hotel Search</h3>
+    <div class="form-group">
+        <label for="hotelChainName">Hotel chain name</label>
+        <input type="text" class="form-control" id="hotelChainName" name="hotelChainName" placeholder="Enter name of a Hotel Chain"/>
+    </div>
+    <div class="form-group">
+      <label for="location">Enter a city name</label>
+      <input type="text" class="form-control" id="location" name="location" placeholder="Enter a city name"/>
+  </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+{% if hotels %}
+    <div class="hotel-results">
+        {% for hotel in hotels %}
+        <div class="card">
+            <div class="card-body">
+              <h4 class="card-title">{{ hotel.hotel_ID }}</h4>
+              <p class="card-text">{{ hotel.address }}</p>
+              <!-- Star rating section -->
+              <div class="star-rating">
+                {% set filled_stars = (hotel.rating / 10) * 10 %}
+                {% set full_stars = (filled_stars // 1) | int %}
+                {% set has_half_star = filled_stars % 1 >= 0.1 %}
+                {% set total_stars = full_stars + (has_half_star and 1 or 0) %}
+                <!-- Full stars -->
+                {% for _ in range(full_stars) %}
+                  <span class="full">&#9733;</span> <!-- HTML code for filled star -->
+                {% endfor %}
+                <!-- Half star, if applicable -->
+                {% if has_half_star %}
+                  <span class="percent" style="width: 50%;">&#9734;</span> <!-- HTML code for half-filled star -->
+                {% endif %}
+                <!-- Empty stars -->
+                {% for _ in range(10 - total_stars) %}
+                  <span class="empty">&#9734;</span> <!-- HTML code for empty star -->
+                {% endfor %}
+                <span class="rating-number">({{ hotel.rating }})</span>
+              </div>
+              <a href="{{ url_for('search.see_rooms', hotel_id= hotel.hotel_ID) }}" class="btn btn-primary">See Rooms</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+  {% if display_results %} 
+    <p>No results found.</p>
+  {% endif %}
+{% endif %}
+{% endblock %}

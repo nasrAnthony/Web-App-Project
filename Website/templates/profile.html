@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+
+<div style="padding-top: 20px;"></div>
+<div class="profile-container">
+    <h1>My Profile</h1>
+    <div class="profile-attribute">
+        <span>Name:</span> {{ name }}
+    </div>
+    <div class="profile-attribute">
+        <span>ID:</span> {{ id }}
+    </div>
+    <div class="profile-attribute">
+        <span>Address:</span> {{ address }}
+    </div>
+    <div class="profile-attribute">
+        <span>Date of Registration:</span> {{ DOR }}
+    </div>
+</div>
+<div style="padding-top: 20px;"></div>
+<h2>My Bookings</h2>
+<div class="table  table-bordered table-hover">
+    <table>
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Hotel ID</th>
+                <th>Room Number</th>
+                <th>Length Of Stay</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Total Due</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.booking_ID }}</td>
+                <td>{{ booking.hotel_ID }}</td>
+                <td>{{ booking.room.room_number }}</td>
+                <td>{{ booking.length_stay }} days</td>
+                <td>{{ booking.start_date }}</td>
+                <td>{{ booking.end_date }}</td>
+                <td>${{ booking.room.price * booking.length_stay }}</td>
+                <td>
+                    <!-- Delete Booking Form -->
+                    <form action="{{ url_for('profile.delete_booking', booking_id= booking.booking_ID) }}" method="post">
+                        <input type="hidden" name="booking_id" value="{{ booking.booking_ID }}">
+                        <button type="submit">Cancel Booking</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">No bookings found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="padding-top: 20px;"></div>
+<h2>My Rentings</h2>
+<div class="table  table-bordered table-hover">
+    <table>
+        <thead>
+            <tr>
+                <th>Renting ID</th>
+                <th>Hotel ID</th>
+                <th>Customer Name</th>
+                <th>Room Number</th>
+                <th>Check-in Date</th>
+                <th>Check-out Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for renting in rentings %}
+            <tr>
+                <td>{{ renting.renting_ID }}</td>
+                <td>{{ renting.hotel_ID }}</td>
+                <td>{{ renting.customer.full_name }}</td>
+                <td>{{ renting.room.room_number }}</td>
+                <td>{{ renting.start_of_stay }}</td>
+                <td>{{ renting.end_of_stay }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">You have no active rentings.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

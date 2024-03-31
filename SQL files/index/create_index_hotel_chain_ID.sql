@@ -1,0 +1,1 @@
+CREATE INDEX idx_hotel_chain_id ON hotel (hotel_chain_ID)

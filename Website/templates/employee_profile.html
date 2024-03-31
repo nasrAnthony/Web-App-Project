@@ -1,0 +1,293 @@
+{% extends "base.html" %} {% block title %}employeeProfile{% endblock %}
+{% block content %}
+<div style="padding-top: 20px;"></div>
+<div class="profile-container">
+    <h1>My Profile</h1>
+    <div class="profile-attribute">
+        <span>Name:</span> {{ name }}
+    </div>
+    <div class="profile-attribute">
+        <span>ID:</span> {{ id }}
+    </div>
+    <div class="profile-attribute">
+        <span>Address:</span> {{ address }}
+    </div>
+    <div class="profile-attribute">
+        <span>Date of Registration:</span> {{ DOR }}
+    </div>
+    <div class="profile-attribute">
+        <span>Employee at the </span> {{ hotel }}
+    </div>
+    <div class="profile-attribute">
+        <span>Role:</span> {{ role }}
+    </div>
+</div>
+<div style="padding-top: 20px;"></div>
+<h2>Upcoming bookings at the {{ hotel }} || Current total capacity: {{ hotel_capacity.total_capacity }}</h2>
+<div class="table  table-bordered table-hover">
+    <table>
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Hotel ID</th>
+                <th>Customer Name</th>
+                <th>Customer ID</th>
+                <th>Room Number</th>
+                <th>Length Of Stay</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Total (CAD)</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in bookings %}
+            <tr>
+                <td>{{ booking.booking_ID }}</td>
+                <td>{{ booking.hotel_ID }}</td>
+                <td>{{ booking.customer.full_name }}</td>
+                <td>{{ booking.customer_ID }}</td>
+                <td>{{ booking.room.room_number }}</td>
+                <td>{{ booking.length_stay }} days</td>
+                <td>{{ booking.start_date }}</td>
+                <td>{{ booking.end_date }}</td>
+                <td>${{ booking.room.price * booking.length_stay }}</td>
+                <td>
+                    <!-- Delete Booking Form -->
+                    <form action="{{ url_for('profile.employee_delete_booking', booking_id= booking.booking_ID) }}" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                        <input type="hidden" name="booking_id" value="{{ booking.booking_ID }}">
+                        <button type="submit">Cancel Booking</button>
+                    </form>
+                </td>
+                <td> <!-- Turn booking into check in -->
+                    <input type="hidden" name="booking_id" value="{{ booking.booking_ID }}">
+                    <button type="submit" data-toggle="modal" data-target="#checkInModal">Check-in</button>
+                    <div class="modal fade" id="checkInModal" tabindex="-1" aria-labelledby="checkInModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="checkInModalLabel">Check-in</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <form method="POST" action="{{ url_for('profile.employee_check_in', booking_id= booking.booking_ID) }}">
+                                <input type="hidden" name="booking_id" value="{{ booking.booking_ID }}">
+                                <div>Payment Details</div>
+                                <div style="padding-top: 10px;"></div>
+                                <div class="form-group">
+                                    <label for="Card number">Card number</label>
+                                    <input type="number" id="card_number_checkin" name="card_number_checkin" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="CVC">CVC</label>
+                                    <input type="number" id="card_cvc_checkin" name="card_cvc_checkin" required>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  <button type="submit" class="btn btn-primary">Check-in</button>
+                                </div>
+                                </form>
+                            </div>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">There are currently no bookings.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="padding-top: 20px;"></div>
+<h2>Current rentings at the {{ hotel }}</h2>
+<div class="table  table-bordered table-hover">
+    <table>
+        <thead>
+            <tr>
+                <th>Renting ID</th>
+                <th>Hotel ID</th>
+                <th>Customer Name</th>
+                <th>Customer ID</th>
+                <th>Room Number</th>
+                <th>Check-in Date</th>
+                <th>Check-out Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for renting in rentings %}
+            <tr>
+                <td>{{ renting.renting_ID }}</td>
+                <td>{{ renting.hotel_ID }}</td>
+                <td>{{ renting.customer.full_name }}</td>
+                <td>{{ renting.customer_ID }}</td>
+                <td>{{ renting.room.room_number }}</td>
+                <td>{{ renting.start_of_stay }}</td>
+                <td>{{ renting.end_of_stay }}</td>
+                <td>
+                    <!-- Delete renting -->
+                    <form action="{{ url_for('profile.employee_delete_renting', renting_id= renting.renting_ID) }}" method="post" onsubmit="return confirm('Are you sure you want to cancel this renting?');">
+                        <input type="hidden" name="renting_id" value="{{ renting.renting_ID }}">
+                        <button type="submit">Cancel Renting</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">There are currently no active rentings.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- rentings_history -->
+<h2>History at {{ hotel }} </h2>
+<div class="table  table-bordered table-hover">
+    <table>
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Hotel ID</th>
+                <th>Length Of Stay</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in booking_history %}
+            <tr>
+                <td>{{ booking.booking_ID }}</td>
+                <td>{{ booking.hotel_ID }}</td>
+                <td>{{ booking.length_stay }} days</td>
+                <td>{{ booking.start_date }}</td>
+                <td>{{ booking.end_date }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">Nothing to see here...</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <table>
+        <thead>
+            <tr>
+                <th>Renting ID</th>
+                <th>Hotel ID</th>
+                <th>Check-in Date</th>
+                <th>Check-out Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for renting in rentings_history %}
+            <tr>
+                <td>{{ renting.renting_ID }}</td>
+                <td>{{ renting.hotel_ID }}</td>
+                <td>{{ renting.start_of_stay }}</td>
+                <td>{{ renting.end_of_stay }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">Nothing to see here...</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!--form method="POST" style="margin-bottom: 2rem;">
+    <button type="submit" class="btn btn-primary">Create Renting</button>
+</form>-->
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#rentingModal">
+    Create Renting
+</button>
+<div style="padding-top: 20px;"></div>
+<!-- Modal -->
+<div class="modal fade" id="rentingModal" tabindex="-1" aria-labelledby="rentingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="rentingModalLabel">Create Renting</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="POST" action="{{ url_for('profile.employee_create_renting') }}">
+            <!-- Customer ID -->
+            <div class="form-group">
+              <label for="customerID">Customer ID</label>
+              <input type="number" class="form-control" id="customerID" name="customerID">
+            </div>
+            <div class="form-group">
+                <label for="roomID">Room</label>
+                <!-- Dropdown for selecting room number -->
+                <select class="form-control" id="roomID" name="roomID">
+                  {% for room in list_rooms %}
+                  <option value="{{ room.room_ID }}">Room {{ room.room_ID }} - ${{ room.price }}/night</option>
+                  {% endfor %}
+                </select>
+            </div>
+            <!-- Start Date -->
+            <div class="form-group">
+                <label for="start_date">Check-in Date:</label>
+                <input type="date" id="start_date" name="start_date" required>
+            </div>
+            <div class="form-group">
+                <label for="end_date">Check-out Date:</label>
+                <input type="date" id="end_date" name="end_date" required>
+            </div>
+            <div>Payment Details</div>
+            <div style="padding-top: 10px;"></div>
+            <div class="form-group">
+                <label for="Card number">Card number</label>
+                <input type="number" id="card_number" name="card_number" required>
+            </div>
+            <div class="form-group">
+                <label for="CVC">CVC</label>
+                <input type="number" id="card_cvc" name="card_cvc" required>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--handle the date selects in the create renting modal menu for employee view.-->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var today = new Date().toISOString().split('T')[0];
+        var startDateInput = document.getElementById('start_date');
+        var endDateInput = document.getElementById('end_date');
+    
+        startDateInput.setAttribute('min', today);
+        startDateInput.value = today;
+        
+        // Initially set the end date minimum to tomorrow
+        var tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        endDateInput.setAttribute('min', tomorrow.toISOString().split('T')[0]);
+        
+        startDateInput.addEventListener('change', function() {
+            var startDate = new Date(this.value);
+            var minEndDate = new Date(startDate);
+    
+            // Set the minimum end date to the day after the start date
+            minEndDate.setDate(minEndDate.getDate() + 1);
+            endDateInput.setAttribute('min', minEndDate.toISOString().split('T')[0]);
+    
+            // If the current end date is before the new minimum, update it
+            if (new Date(endDateInput.value) < minEndDate) {
+                endDateInput.value = minEndDate.toISOString().split('T')[0];
+            }
+        });
+    });
+    </script>
+{% endblock %}

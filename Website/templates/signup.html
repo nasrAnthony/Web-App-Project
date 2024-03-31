@@ -1,0 +1,89 @@
+{% extends "base.html" %} {% block title %}Sign-up{% endblock %}
+{% block content %}
+<form method="POST">
+    <h3 align="center">Welcome, please create your account.</h3>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Enter your Email"/>
+    </div>
+    <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <input type="text" class="form-control" id="fullName" name="fullName" placeholder="Enter your full name"/>
+    </div>
+    <div class="form-group">
+        <label for="SIN/SSN">ID</label>
+        <input type="number" class="form-control" id="userID" name="userID" placeholder="Enter SIN/SSN"/>
+    </div>
+    <div class="form-group">
+        <label for="address">Address</label>
+        <input type="text" class="form-control" id="address" name="address" placeholder="Enter your current address."/>
+    </div>
+    <div class="form-group">
+        <label for="password1">Password</label>
+        <input type="password" class="form-control" id="passwordTemp" name="passwordTemp" placeholder="Enter your password."/>
+    </div>
+    <div class="form-group">
+        <label for="password2">Confirm Password</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Re-enter your password."/>
+    </div>
+    <!-- New: User Type Selection -->
+    <div class="form-group">
+        <label>Are you a customer or an employee? </label>
+        <div>
+            <input type="radio" id="customer" name="userType" value="customer" checked>
+            <label for="customer">Customer</label>
+        </div>
+        <div>
+            <input type="radio" id="employee" name="userType" value="employee">
+            <label for="employee">Employee</label>
+        </div>
+    </div>
+
+    <!-- New: Additional Fields for Employees -->
+    <div class="form-group" id="employeeFields" style="display:none;">
+        <label for="role">Role</label>
+        <div class="form-group">
+            <!-- Dropdown for selecting employee role. -->
+            <select class="form-control" id="role" name="role">
+              {% for role in roles %}
+              <option value="{{ role }}">{{ role }}</option>
+              {% endfor %}
+            </select>
+        </div>
+        <label for="Hotel Chain">Hotel Chain</label>
+        <div class="form-group">
+            <!-- Dropdown for selecting hotel chain that the employee works for. -->
+            <select class="form-control" id="hotelChain" name="hotelChain">
+              {% for chain in chains %}
+              <option value="{{ chain.hotel_chain_ID }}">{{ chain.hotel_chain_ID }}</option>
+              {% endfor %}
+            </select>
+        </div>
+        <label for="specificHotel">Which hotel belonging to the chain do you work for?</label>
+        <input type="text" class="form-control" id="specificHotel" name="specificHotel" placeholder="..."/>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Sign up</button>
+</form>
+<div style="padding-top: 20px;"></div>
+
+<script>
+    // JavaScript to toggle the visibility of the employee fields
+    document.addEventListener('DOMContentLoaded', function() {
+        var userTypeRadios = document.getElementsByName('userType');
+        var employeeFields = document.getElementById('employeeFields');
+
+        var toggleEmployeeFields = function() {
+            if(document.getElementById('employee').checked) {
+                employeeFields.style.display = 'block';
+            } else {
+                employeeFields.style.display = 'none';
+            }
+        };
+
+        Array.prototype.forEach.call(userTypeRadios, function(radio) {
+            radio.addEventListener('change', toggleEmployeeFields);
+        });
+    });
+</script>
+{% endblock %}
