@@ -1,6 +1,11 @@
 from . import db
 from flask_login import UserMixin
 from sqlalchemy import UniqueConstraint
+import pickle
+
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
 
 class User(db.Model, UserMixin):
     __tablename__ = 'User'
@@ -107,9 +112,10 @@ class History(db.Model):
 
 
 #creating table view... 1
-class AvailableRoomsPerArea(db.Model):
-    __tablename__ = 'AvailableRoomsPerArea' 
-    __table_args__ = {'extend_existing': True}
+class ViewAvailableRoomsPerAreaView(Base):
+    __tablename__ = 'ViewAvailableRoomsPerAreaView' 
+    __table_args__ = {'info': dict(is_view=True)}
+    #__abstract__ = True
     # Define primary key and any other necessary columns, 
     # if autoload is not used or not working as expected
     location = db.Column(db.String(255), primary_key=True)
@@ -117,12 +123,11 @@ class AvailableRoomsPerArea(db.Model):
 
 
 #creating table view... 2
-class HotelTotalCapacity(db.Model):
-    __tablename__ = 'hoteltotalcapacity'  
-    __table_args__ = {'extend_existing': True}
+class ViewHotelTotalCapacityView(Base):
+    __tablename__ = 'ViewhoteltotalcapacityView'  
+    __table_args__ = {'info': dict(is_view=True)}
+   # __abstract__ = True
     # Define primary key and any other necessary columns, 
     # if autoload is not used or not working as expected
     hotel_ID = db.Column(db.String(255), primary_key=True)
     total_capacity = db.Column(db.Integer)
-
-

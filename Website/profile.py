@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user, login_manager
 from . import db
-from .models import Hotel, Hotel_Chain, Room, Booking, User, Employee, Renting, History, HotelTotalCapacity
+from .models import Hotel, Hotel_Chain, Room, Booking, User, Employee, Renting, History, ViewHotelTotalCapacityView
 import pickle
 from .searchEngine import validate_booking, validate_booking_with_rentings
 import time
@@ -35,8 +35,8 @@ def employee_profile():
     history_bookings = pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_bookings)
     history_rentings =  pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_rentings)
     available_rooms = Room.query.filter_by(hotel_ID = current_user.hotel_ID).all()
-    capacity = HotelTotalCapacity.query.filter_by(hotel_ID =current_user.hotel_ID).first()
-    #print(capacity)
+    #capacity = ViewHotelTotalCapacityView.query.filter_by(hotel_ID =current_user.hotel_ID).first()
+    capacity = db.session.query(ViewHotelTotalCapacityView).filter_by(hotel_ID= current_user.hotel_ID).all()[0]
    #for renting in history_rentings:
    #   print(renting, renting.room_ID)
     return render_template('employee_profile.html',name = current_user.full_name, id = current_user.id, address = current_user.address, 
@@ -53,7 +53,7 @@ def delete_booking(booking_id):
     customer_rentings = Renting.query.filter_by(customer_ID= current_user.id).all()
     flash('Booking deleted!', category='success')
     return render_template('profile.html', name = current_user.full_name, id = current_user.id, address = current_user.address, 
-                           DOR = current_user.DOR, bookings = customer_bookings,rentings = customer_rentings)
+                           DOR = current_user.DOR, bookings = customer_bookings, rentings = customer_rentings)
 
 
 @display_profile.route("/profile-employee/delete-booking/<int:booking_id>", methods=['GET', 'POST'])
@@ -68,7 +68,7 @@ def employee_delete_booking(booking_id):
     #employee_profile()
     history_bookings = pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_bookings)
     history_rentings =  pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_rentings)
-    capacity = HotelTotalCapacity.query.filter_by(hotel_ID =current_user.hotel_ID).first()
+    capacity = db.session.query(ViewHotelTotalCapacityView).filter_by(hotel_ID= current_user.hotel_ID).all()[0]
     return render_template('employee_profile.html',name = current_user.full_name, id = current_user.id, address = current_user.address, 
                           DOR = current_user.DOR, hotel = current_user.hotel_ID, hotel_Chain= current_user.hotel_chain_ID, 
                           role= current_user.role, bookings = hotel_bookings, rentings = hotel_rentings, booking_history = history_bookings, 
@@ -116,7 +116,7 @@ def employee_check_in(booking_id):
             db.session.commit()
             history_bookings = pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_bookings)
             history_rentings =  pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_rentings)
-            capacity = HotelTotalCapacity.query.filter_by(hotel_ID =current_user.hotel_ID).first()
+            capacity = db.session.query(ViewHotelTotalCapacityView).filter_by(hotel_ID= current_user.hotel_ID).all()[0]
             flash('Customer has been checked in, a renting has replaced the booking!', category='success')
             return render_template('employee_profile.html',name = current_user.full_name, id = current_user.id, address = current_user.address, 
                                    DOR = current_user.DOR, hotel = current_user.hotel_ID, hotel_Chain= current_user.hotel_chain_ID, 
@@ -136,7 +136,7 @@ def employee_check_in(booking_id):
             history_bookings = pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_bookings)
             history_rentings =  pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_rentings)
             flash(is_pay_valid[1], category='error')
-            capacity = HotelTotalCapacity.query.filter_by(hotel_ID =current_user.hotel_ID).first()
+            capacity = db.session.query(ViewHotelTotalCapacityView).filter_by(hotel_ID= current_user.hotel_ID).all()[0]
             return render_template('employee_profile.html',name = current_user.full_name, id = current_user.id, address = current_user.address, 
                                    DOR = current_user.DOR, hotel = current_user.hotel_ID, hotel_Chain= current_user.hotel_chain_ID, 
                                    role= current_user.role, bookings = hotel_bookings, rentings = hotel_rentings, booking_history = history_bookings,
@@ -153,7 +153,7 @@ def employee_delete_renting(renting_id):
     flash('Renting deleted!', category='success') 
     history_bookings = pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_bookings)
     history_rentings =  pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_rentings)
-    capacity = HotelTotalCapacity.query.filter_by(hotel_ID =current_user.hotel_ID).first()
+    capacity = db.session.query(ViewHotelTotalCapacityView).filter_by(hotel_ID= current_user.hotel_ID).all()[0]
     return render_template('employee_profile.html',name = current_user.full_name, id = current_user.id, address = current_user.address, 
                          DOR = current_user.DOR, hotel = current_user.hotel_ID, hotel_Chain= current_user.hotel_chain_ID, 
                          role= current_user.role, bookings = hotel_bookings, rentings = hotel_rentings, booking_history = history_bookings,
@@ -238,7 +238,7 @@ def employee_create_renting():
         history_rentings =  pickle.loads(History.query.filter_by(hotel_ID = current_user.hotel_ID).first().list_rentings)
 
     available_rooms = Room.query.filter_by(hotel_ID = current_user.hotel_ID).all()
-    capacity = HotelTotalCapacity.query.filter_by(hotel_ID =current_user.hotel_ID).first()
+    capacity = db.session.query(ViewHotelTotalCapacityView).filter_by(hotel_ID= current_user.hotel_ID).all()[0]
     return render_template('employee_profile.html',name = current_user.full_name, id = current_user.id, address = current_user.address, 
                          DOR = current_user.DOR, hotel = current_user.hotel_ID, hotel_Chain= current_user.hotel_chain_ID, 
                          role= current_user.role, bookings = hotel_bookings, rentings = hotel_rentings, booking_history = history_bookings, 

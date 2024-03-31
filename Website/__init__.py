@@ -16,7 +16,7 @@ def init_application(): #initialize the application and instanciate Flask module
     application.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://tony:Aliame123@localhost/eHotelsDB'
     application.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.init_app(application)
-    from .models import User, Hotel_Chain, Hotel, Room, History, Renting, Booking, Employee, AvailableRoomsPerArea  #import models for table creation.
+    from .models import User, Hotel_Chain, Hotel, Room, History, Renting, Booking, Employee, ViewAvailableRoomsPerAreaView, ViewHotelTotalCapacityView  #import models for table creation.
     #import blueprints
     #from .models import User, Hotel_Chain, Hotel, Room, History, Renting, Booking, Employee  #import models for table creation.
     from .views import views
@@ -24,12 +24,12 @@ def init_application(): #initialize the application and instanciate Flask module
     from .authenticator import authenticator
     from .searchEngine import search_engine
     from .profile import display_profile
-    if(database_exists('mysql+pymysql://tony:Aliame123@localhost/eHotelsDB')):
-        print('Database already exists!')
-    else:
-        with application.app_context():
-            db.create_all() #create the tables in the database, but won't update the :
-            print('Database not found. A new one was created!')
+    #if(database_exists('mysql+pymysql://tony:Aliame123@localhost/eHotelsDB')):
+    #    print('Database already exists!')
+    #else:
+    with application.app_context():
+        db.create_all() #create the tables in the database, but won't update the :
+        print('Database not found. A new one was created!')
     login_manager = LoginManager()
     login_manager.login_view = 'authenticator.login'
     login_manager.init_app(application)

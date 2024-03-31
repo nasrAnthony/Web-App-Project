@@ -1,10 +1,12 @@
 #imports
 from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flask_login import login_user, login_required, logout_user, current_user, login_manager
+from sqlalchemy import or_
 from datetime import date #used to get Customer DOR. 
-from .models import User, Employee, Hotel, Hotel_Chain
+from .models import User, Employee, Hotel, Hotel_Chain, History
 #from werkzeug.security import check_password_hash, generate_password_hash #will need these to secure the passwords. 
 from . import db
+import pickle
 
 authenticator = Blueprint('authenticator', __name__)
 @authenticator.route("/login", methods=['GET', 'POST'])
@@ -59,9 +61,9 @@ def validateUser(email, passwordv1, passwordv2, fullName, ID, address, user, emp
                                                 #(False, string reason) if a problem is encountered. 
     #Validation:
     if user : #check if user exists
-        return (False, "Email is already in use by a customer account.")
+        return (False, "Email/ID is already in use by a customer account.")
     elif employee:
-        return (False, "Email is already in use by an employee account.")
+        return (False, "Email/ID is already in use by an employee account.")
     if len(email) < 4:
         return (False, "Email is too short. It must be at least 4 characters.")
     elif len(fullName) < 3: #meet the trigger implemented in database. 
@@ -86,7 +88,7 @@ def validateEmployee(email, passwordv1, passwordv2, fullName, ID, address, role,
     hotelSearch = Hotel.query.filter_by(hotel_ID=specific_hotel, hotel_chain_ID=hotel).first() #check if hotel exists in db
     #hotel_chain_search = Hotel_Chain.query.filter_by(hotel_chain_ID=hotel).first() #check if hotel chain exists in db
     if user: #check if user exists
-        return (False, "Email is already in use by a customer account.")
+        return (False, "Email/ID is already in use by a customer account.")
     elif employee:
         return (False, "Email is already in use by an employee account.")
     elif not(hotelSearch): #check if hotel not in db 
@@ -130,8 +132,9 @@ def sign_up():
         address = request.form.get('address')
         userType = request.form.get('userType')
         #Validation:
-        user = User.query.filter_by(email=email).first()
-        employee = Employee.query.filter_by(email=email).first()
+        #user = User.query.filter_by(email=email).first()
+        user = User.query.filter(or_(User.email==email, User.id == userID)).first()
+        employee = Employee.query.filter(or_(Employee.email == email, Employee.id == userID)).first()
         if(str(userType) == "customer"):
             res = validateUser(email, passwordv1, passwordv2, full_name, userID, address, user, employee)
         if(str(userType) == "employee"):
@@ -164,3 +167,4 @@ def sign_up():
         else: #Validation has failed
             flash(reason, category='error') #show user error message. 
     return render_template('signup.html', roles=  available_roles, chains= hotel_chains)
+

@@ -1,6 +1,7 @@
-from . import db
-from .models import Hotel,History
+from .__init__ import db
+from models import Hotel, History
 import pickle
+
 
 #will populate the history for each of the existing hotels as empty pickle lists []. 
 #only need to run this script once. 
@@ -15,6 +16,6 @@ def populate_history():
         db.session.add(new_history)
         db.session.commit()
 
-
 #call function to populate
 populate_history()
+        

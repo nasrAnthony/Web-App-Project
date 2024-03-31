@@ -135,15 +135,17 @@ def populate_history():
 @login_required
 def see_bookings(room_id, hotel_id):
     if request.method == 'POST':
+        #check if there exists history entites yet. 
+        is_there_history = History.query.all()
+        if not(is_there_history):
+            print("No history found, a new batch was pushed to the DB!")
+            populate_history()
         start_date = request.form.get('start_date') #booking start date. 
         end_date = request.form.get('end_date') #booking end date. 
         #print(start_date, end_date)
         is_valid_booking = validate_booking(room_id, hotel_id, start_date, end_date)
         is_valid_renting = validate_booking_with_rentings(room_id, hotel_id, start_date, end_date)
         if(is_valid_booking[0] and is_valid_renting[0] and not(user_is_employee())): #booking is valid. 
-            #print(is_valid_booking[1])
-            #COMMENT out. 
-            #populate_history()
             hotel = Hotel.query.filter_by(hotel_ID = hotel_id).first()#find the  
             history = History.query.filter_by(hotel_ID = hotel_id).first() #find the history associated with the hotel. 
             booking_id = abs(int(current_user.id - int(time.time()))) #creating a unique booking id as a mix of user id and current time at creation of booking. 
